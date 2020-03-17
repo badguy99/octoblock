@@ -11,8 +11,9 @@ class OctoBlock(hass.Hass):
 
     def get_best_period_and_cost(self, kwargs):
         hours = self.args['hour']
+        region = self.args['region']
         d = datetime.datetime.now().isoformat()
-        r = requests.get('https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-H/standard-unit-rates/?period_from=' + d)
+        r = requests.get('https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-' + str(region).upper() + '/standard-unit-rates/?period_from=' + d)
 
         tariff = json.loads(r.text)
         tariffresults = tariff[u'results']
