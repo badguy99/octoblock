@@ -1,5 +1,5 @@
 # octoblock
-Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block and works out the price. It creates and sets sensors for the cost and start time,  for example, using the apps.yaml file below, the following entities are created and then updated:
+Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block and works out the price of that block, for the Octopus Energy, Agile Octopus tariff. It creates and sets sensors for the cost and start time,  for example, using the apps.yaml file below, the following entities are created and then updated:
 ```
 sensor.octopus_1hour_time
 sensor.octopus_1hour_cost
@@ -9,7 +9,7 @@ sensor.octopus_1_5hour_cost
 
 ### Installation
 
-Use [HACS](https://github.com/custom-components/hacs) or download the octoblock directory from inside the apps directory here to your local apps directory, then add the configuration to enable the octoblock module.
+Use [HACS](https://github.com/custom-components/hacs) or download the octoblock directory from inside the apps directory [here](https://github.com/badguy99/octoblock/releases) to your local apps directory, then add the configuration to enable the octoblock module.
 The file `/config/appdaemon/apps/octoblock.py` will need to be updated if you are not in region “H” - you will need to update the `E-1R-AGILE-18-02-21-H` part of the url that is pulled back with the prices, to have the correct region letter.
 
 ### Apps.yaml Configuration
