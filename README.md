@@ -7,7 +7,7 @@ sensor.octopus_1_5hour_time
 sensor.octopus_1_5hour_cost
 ```
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ### Installation
 
@@ -70,4 +70,4 @@ Once the sensors are created, they can be displayed as cards within the Lovelace
         title: Best 1.5hr Price
         type: entities
 ```
-![image Lovelace UI best usage time example cards](https://github.com/badguy99/octoblock/blob/master/LovelaceBesttimeCard.PNG)
+![Lovelace UI best usage time example cards](https://github.com/badguy99/octoblock/blob/master/LovelaceBesttimeCard.PNG)
