@@ -26,9 +26,31 @@ octo_block_90minutes:
   class: OctoBlock
   region: H
   hour: 1.5
+  start_period: now
   ```
-The module and class sections need to remain as above, but the title, and number of hours can be set as you like, and you can have multiple blocks with different time periods as needed. It will work with whole hour or half hour blocks in the `hour` setting.
+The module and class sections need to remain as above, other sections should be changed as required.
+
+| Field        | Changeable | Example          |
+| -----        | ---------- | -------          |
+| Title        | Yes        | octo_block_1hour |
+| module       | No         | octoblock        |
+| class        | No         | OctoBlock        |
+| region       | Yes        | H                |
+| hour         | Yes        | 1                |
+| start_period | Yes        | today            |
+
+You can have multiple blocks with different time periods (`hour` setting) or starting points (`start_period` setting) as needed. It will work with whole hour or half hour blocks in the `hour` setting.
 `region` is the region letter from the end of `E-1R-AGILE-18-02-21-H` which can be found on the [Octopus Energy developer dashboard](https://octopus.energy/dashboard/developer/) webpage in the Unit Rates section for your account.
+`start_period` is optional, it can be set to either `now` or `today`, and will default to `now`
+`now` and `today` give subtly different results. `now` is reevaluated ever time the callback is run (once every 30 minutes), and `today` uses a start time of 00:00:00 with today's date.
+This means that using `today` you will get the absolute cheapest block for today, even if that is in the past, and using `now` will get the cheapest block for the remainder of the day. `today` may be of more use with automated triggers, and `now` may be of use when you are wanting to display the cheapest time on a Lovelace UI card and use that information to turn on devices which cannot be automated, by hand.
+
+This may be best illustrated with a couple of pictures:
+![State information with now start period](https://github.com/badguy99/octoblock/blob/master/StartTimeNow.PNG)
+Using `now` start_period this has turned on and off a few times within the day as it is reevaluated as the day goes on
+
+![State information with today start period](https://github.com/badguy99/octoblock/blob/master/StartTimeToday.PNG)
+Using `today` start_period this has only turned on once during the day
 
 ### Home Assistant Automation
 
