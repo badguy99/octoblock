@@ -61,8 +61,10 @@ class OctoBlock(hass.Hass):
                          ' starts at: {}'.format(self.time))
 
         hours = str(hours).replace(".", "_")
-        self.set_state(
-            'sensor.octopus_' + hours + 'hour_time', state=self.time)
-        self.set_state(
-            'sensor.octopus_' + hours + 'hour_price', state=round(
-                self.minprice, 4))
+        self.set_state('sensor.octopus_' + hours + 'hour_time',
+                       state=self.time,
+                       attributes={'icon': 'mdi:clock-outline'})
+        self.set_state('sensor.octopus_' + hours + 'hour_price',
+                       state=round(self.minprice, 4),
+                       attributes={'unit_of_measurement': 'p/kWh',
+                                   'icon': 'mdi:flash'})
