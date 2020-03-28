@@ -2,6 +2,8 @@ import appdaemon.plugins.hass.hassapi as hass
 import requests
 import json
 import datetime
+import dateutil.parser
+import pytz
 
 
 class OctoBlock(hass.Hass):
@@ -15,6 +17,8 @@ class OctoBlock(hass.Hass):
         region = self.args.get('region', 'H')
         start_period = self.args.get('start_period', 'now')
         start_period = str(start_period).lower()
+        use_timezone = self.args.get('use_timezone', False)
+
         if start_period == 'today':
             d = datetime.date.today().isoformat() + 'T00:00:00'
         elif start_period == 'now':
@@ -57,6 +61,12 @@ class OctoBlock(hass.Hass):
         for period in tariffresults:
             if period[str(hours) + '_hour_average'] == self.minprice:
                 self.time = period[u'valid_from']
+                if use_timezone:
+                    fmt = '%Y-%m-%dT%H:%M:%S %Z'
+                    greenwich = pytz.timezone('Europe/London')
+                    date_time = dateutil.parser.parse(self.time)
+                    local_datetime = date_time.astimezone(greenwich)
+                    self.time = local_datetime.strftime(fmt)
                 self.log('Lowest priced {} hour period'.format(str(hours)) +
                          ' starts at: {}'.format(self.time))
 
