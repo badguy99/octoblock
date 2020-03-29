@@ -1,10 +1,16 @@
 # octoblock
-Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block and works out the price of that block, for the Octopus Energy, Agile Octopus tariff. It creates and sets sensors for the cost and start time,  for example, using the apps.yaml file below, the following entities are created and then updated:
+Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. It creates and sets sensors for the cost and start time,  for example, using the apps.yaml file below, the following entities are created and then updated:
 ```
 sensor.octopus_1hour_time
-sensor.octopus_1hour_cost
+sensor.octopus_1hour_price
 sensor.octopus_1_5hour_time
-sensor.octopus_1_5hour_cost
+sensor.octopus_1_5hour_price
+```
+
+Sensors for export will be created with naming such as:
+```
+sensor.octopus_export_1hour_time
+sensor.octopus_export_1hour_price
 ```
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
@@ -41,6 +47,8 @@ The module and class sections need to remain as above, other sections should be 
 | hour         | Yes        | 1                |
 | start_period | Yes        | today            |
 | use_timezone | Yes        | True             |
+| import       | Yes        | True             |
+| export       | Yes        | False            |
 
 You can have multiple blocks with different time periods (`hour` setting) or starting points (`start_period` setting) as needed. It will work with whole hour or half hour blocks in the `hour` setting.
 
@@ -63,6 +71,8 @@ Using `now` start_period this has turned on and off a few times within the day a
 Using `today` start_period this has only turned on once during the day
 
 `use_timezone` can be set to True or False, and defaults to False, it allows you to specify if the date/time should be displayed in UTC (False), or using Europe/London (True) as the timezone. For example, `2020-03-29T02:00:00Z` or `2020-03-29T03:00:00 BST` respectively.
+
+`import` and `export` should be set to True or False as required, `import = True` and `export = False` for the Agile Octopus tariff and `import = False` and `export = True` for the Agile Outgoing Octopus tariff.
 
 ### Home Assistant Automation
 
