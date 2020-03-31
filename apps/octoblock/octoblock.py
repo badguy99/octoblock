@@ -29,15 +29,22 @@ class OctoBlock(hass.Hass):
             if self.args.get('import') and self.args.get('export'):
                 self.log('import and export should not both be True in the ' +
                          'same configuration block', level='ERROR')
+
+        now = datetime.datetime.now()
         if start_period == 'today':
-            d = datetime.date.today().isoformat() + 'T00:00:00'
+            if now.time() < datetime.time(23, 30, 0):
+                d = datetime.date.today().isoformat() + 'T00:00:00'
+            else:
+                d = ((datetime.date.today() +
+                     datetime.timedelta(days=1)).isoformat() +
+                     'T00:00:00')
         elif start_period == 'now':
-            d = datetime.datetime.now().isoformat()
+            d = now.isoformat()
         else:
             self.log(
                 'start_period in apps.yaml is not either "today" or "now",' +
                 ' defaulting to "now"')
-            d = datetime.datetime.now().isoformat()
+            d = now.isoformat()
 
         self.get_period_and_cost(region, d)
 
