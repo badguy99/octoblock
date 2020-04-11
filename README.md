@@ -13,6 +13,13 @@ sensor.octopus_export_1hour_time
 sensor.octopus_export_1hour_price
 ```
 
+With `start_period` set to `now` and `hours` set to `0` the current import or export price is returned, and the sensors are named:
+```
+sensor.octopus_current_price
+sensor.octopus_export_current_price
+```
+
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ### Installation
@@ -64,11 +71,13 @@ This may be best illustrated with a couple of pictures:
 
 ![State information with now start period](https://github.com/badguy99/octoblock/blob/master/StartTimeNow.PNG)
 
-Using `now` start_period this has turned on and off a few times within the day as it is reevaluated as the day goes on
+Using `now` `start_period` this has turned on and off a few times within the day as it is reevaluated as the day goes on
 
 ![State information with today start period](https://github.com/badguy99/octoblock/blob/master/StartTimeToday.PNG)
 
-Using `today` start_period this has only turned on once during the day
+Using `today` `start_period` this has only turned on once during the day
+
+Setting `start_period` to `now` and `hours` to `0` will give the current import or export price.
 
 `use_timezone` can be set to True or False, and defaults to False, it allows you to specify if the date/time should be displayed in UTC (False), or using Europe/London (True) as the timezone. For example, `2020-03-29T02:00:00Z` or `2020-03-29T03:00:00 BST` respectively.
 
