@@ -8,9 +8,11 @@ import pytz
 
 class OctoBlock(hass.Hass):
     def initialize(self):
-        time = datetime.datetime.now()
-        time = time + datetime.timedelta(seconds=5)
-        self.run_every(self.period_and_cost_callback, time, 30 * 60)
+        on00 = datetime.time(0, 0, 0)
+        on30 = datetime.time(0, 30, 0)
+        self.run_in(self.period_and_cost_callback, 5)
+        self.run_hourly(self.period_and_cost_callback, on00)
+        self.run_hourly(self.period_and_cost_callback, on30)
 
     def period_and_cost_callback(self, kwargs):
         self.hours = self.args.get('hour', 1)
@@ -29,7 +31,6 @@ class OctoBlock(hass.Hass):
             if self.args.get('import') and self.args.get('export'):
                 self.log('import and export should not both be True in the ' +
                          'same configuration block', level='ERROR')
-
         now = datetime.datetime.now()
         if start_period == 'today':
             if now.time() < datetime.time(23, 30, 0):
@@ -50,21 +51,33 @@ class OctoBlock(hass.Hass):
 
         hours = str(self.hours).replace(".", "_")
         if self.incoming:
-            self.set_state('sensor.octopus_' + hours + 'hour_time',
-                           state=self.time,
-                           attributes={'icon': 'mdi:clock-outline'})
-            self.set_state('sensor.octopus_' + hours + 'hour_price',
-                           state=round(self.price, 4),
-                           attributes={'unit_of_measurement': 'p/kWh',
-                                       'icon': 'mdi:flash'})
+            if self.hours == 0:
+                self.set_state('sensor.octopus_current_price',
+                               state=round(self.price, 4),
+                               attributes={'unit_of_measurement': 'p/kWh',
+                                           'icon': 'mdi:flash'})
+            else:
+                self.set_state('sensor.octopus_' + hours + 'hour_time',
+                               state=self.time,
+                               attributes={'icon': 'mdi:clock-outline'})
+                self.set_state('sensor.octopus_' + hours + 'hour_price',
+                               state=round(self.price, 4),
+                               attributes={'unit_of_measurement': 'p/kWh',
+                                           'icon': 'mdi:flash'})
         elif self.outgoing:
-            self.set_state('sensor.octopus_export_' + hours + 'hour_time',
-                           state=self.time,
-                           attributes={'icon': 'mdi:clock-outline'})
-            self.set_state('sensor.octopus_export_' + hours + 'hour_price',
-                           state=round(self.price, 4),
-                           attributes={'unit_of_measurement': 'p/kWh',
-                                       'icon': 'mdi:flash-outline'})
+            if self.hours == 0:
+                self.set_state('sensor.octopus_export_current_price',
+                               state=round(self.price, 4),
+                               attributes={'unit_of_measurement': 'p/kWh',
+                                           'icon': 'mdi:flash-outline'})
+            else:
+                self.set_state('sensor.octopus_export_' + hours + 'hour_time',
+                               state=self.time,
+                               attributes={'icon': 'mdi:clock-outline'})
+                self.set_state('sensor.octopus_export_' + hours + 'hour_price',
+                               state=round(self.price, 4),
+                               attributes={'unit_of_measurement': 'p/kWh',
+                                           'icon': 'mdi:flash-outline'})
 
     def get_period_and_cost(self, region, timeperiod):
         baseurl = 'https://api.octopus.energy/v1/products/'
@@ -86,42 +99,55 @@ class OctoBlock(hass.Hass):
         blocks = float(self.hours) * 2
         blocks = int(blocks)
 
-        for period in tariffresults:
-            curridx = tariffresults.index(period)
-            tr_len = len(tariffresults)
-            if curridx > tr_len-blocks:
-                if self.incoming:
-                    period[str(self.hours) + '_hour_average'] = 99
-                elif self.outgoing:
-                    period[str(self.hours) + '_hour_average'] = 0
-                continue
-            cost = 0
-            for block in range(blocks):
-                cost = cost + (tariffresults[curridx+block][u'value_inc_vat'])
-            cost = cost / blocks
-            period[str(self.hours) + '_hour_average'] = cost
+        if self.hours == 0:
+            if self.incoming:
+                self.price = tariffresults[0]['value_inc_vat']
+                self.log('Current import price is: {} p/kWh'.format(
+                    self.price))
+            elif self.outgoing:
+                self.price = tariffresults[0]['value_inc_vat']
+                self.log('Current export price is: {} p/kWh'.format(
+                    self.price))
+        else:
+            for period in tariffresults:
+                curridx = tariffresults.index(period)
+                tr_len = len(tariffresults)
+                if curridx > tr_len-blocks:
+                    if self.incoming:
+                        period[str(self.hours) + '_hour_average'] = 99
+                    elif self.outgoing:
+                        period[str(self.hours) + '_hour_average'] = 0
+                    continue
+                cost = 0
+                for block in range(blocks):
+                    cost = cost + (
+                        tariffresults[curridx+block][u'value_inc_vat'])
+                cost = cost / blocks
+                period[str(self.hours) + '_hour_average'] = cost
 
-        if self.incoming:
-            self.price = min(
-                period[str(self.hours) + '_hour_average']
-                for period in tariffresults)
-            self.log('Lowest average price for {}'.format(str(self.hours)) +
-                     ' hour block is: {} p/kWh'.format(self.price))
-        elif self.outgoing:
-            self.price = max(
-                period[str(self.hours) + '_hour_average']
-                for period in tariffresults)
-            self.log('Highest average price for {}'.format(str(self.hours)) +
-                     ' hour block is: {} p/kWh'.format(self.price))
+            if self.incoming:
+                self.price = min(
+                    period[str(self.hours) + '_hour_average']
+                    for period in tariffresults)
+                self.log('Lowest average price for ' +
+                         '{}'.format(str(self.hours)) +
+                         ' hour block is: {} p/kWh'.format(self.price))
+            elif self.outgoing:
+                self.price = max(
+                    period[str(self.hours) + '_hour_average']
+                    for period in tariffresults)
+                self.log('Highest average price for ' +
+                         '{}'.format(str(self.hours)) +
+                         ' hour block is: {} p/kWh'.format(self.price))
 
-        for period in tariffresults:
-            if period[str(self.hours) + '_hour_average'] == self.price:
-                self.time = period[u'valid_from']
-                if self.use_timezone:
-                    fmt = '%Y-%m-%dT%H:%M:%S %Z'
-                    greenwich = pytz.timezone('Europe/London')
-                    date_time = dateutil.parser.parse(self.time)
-                    local_datetime = date_time.astimezone(greenwich)
-                    self.time = local_datetime.strftime(fmt)
-                self.log('Best priced {} hour period'.format(str(self.hours)) +
-                         ' starts at: {}'.format(self.time))
+            for period in tariffresults:
+                if period[str(self.hours) + '_hour_average'] == self.price:
+                    self.time = period[u'valid_from']
+                    if self.use_timezone:
+                        fmt = '%Y-%m-%dT%H:%M:%S %Z'
+                        greenwich = pytz.timezone('Europe/London')
+                        date_time = dateutil.parser.parse(self.time)
+                        local_datetime = date_time.astimezone(greenwich)
+                        self.time = local_datetime.strftime(fmt)
+                    self.log('Best priced {} hour '.format(str(self.hours)) +
+                             'period starts at: {}'.format(self.time))
