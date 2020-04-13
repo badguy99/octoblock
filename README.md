@@ -40,8 +40,11 @@ octo_block_90minutes:
   class: OctoBlock
   region: H
   hour: 1.5
-  start_period: now
+  start_period: today
   use_timezone: True
+  limits:
+    start_time: '07:00'
+    end_time: '16:00'
   ```
 The module and class sections need to remain as above, other sections should be changed as required.
 
@@ -56,6 +59,9 @@ The module and class sections need to remain as above, other sections should be 
 | use_timezone | Yes        | True             |
 | import       | Yes        | True             |
 | export       | Yes        | False            |
+| limits       |            |                  |
+|   start_time | Yes        | '07:00'          |
+|   end_time   | Yes        | '16:00'          |
 
 You can have multiple blocks with different time periods (`hour` setting) or starting points (`start_period` setting) as needed. It will work with whole hour or half hour blocks in the `hour` setting.
 
@@ -78,6 +84,8 @@ Using `now` `start_period` this has turned on and off a few times within the day
 Using `today` `start_period` this has only turned on once during the day
 
 Setting `start_period` to `now` and `hours` to `0` will give the current import or export price.
+
+When using `today` for the `start_period` it can be limited further usings `limits > start_time` and/or `limits > end_time` (please note the formating in the example yaml above) to restrict the period searched. This may be useful for example if you have something that you only want to run within certain times of the day, due to noise issues etc.
 
 `use_timezone` can be set to True or False, and defaults to False, it allows you to specify if the date/time should be displayed in UTC (False), or using Europe/London (True) as the timezone. For example, `2020-03-29T02:00:00Z` or `2020-03-29T03:00:00 BST` respectively.
 

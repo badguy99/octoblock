@@ -19,6 +19,12 @@ class OctoBlock(hass.Hass):
         region = self.args.get('region', 'H')
         start_period = self.args.get('start_period', 'now')
         start_period = str(start_period).lower()
+        limits = self.args.get('limits',  None)
+        limit_start = None
+        limit_end = None
+        if limits:
+            limit_start = limits.get('start_time', None)
+            limit_end = limits.get('end_time', None)
         self.use_timezone = self.args.get('use_timezone', False)
         self.incoming = self.args.get('import', True)
         self.outgoing = self.args.get('export', False)
@@ -34,7 +40,26 @@ class OctoBlock(hass.Hass):
         now = datetime.datetime.now()
         if start_period == 'today':
             if now.time() < datetime.time(23, 30, 0):
-                d = datetime.date.today().isoformat() + 'T00:00:00'
+                if limit_end:
+                    try:
+                        datetime.datetime.strptime(limit_end, "%H:%M")
+                    except ValueError:
+                        self.log('end_time not in correct HH:MM format',
+                                 level='ERROR')
+
+                    limit_end = (datetime.date.today().isoformat() + 'T' +
+                                 limit_end + ':00')
+                if limit_start:
+                    try:
+                        datetime.datetime.strptime(limit_start, "%H:%M")
+                    except ValueError:
+                        self.log('start_time not in correct HH:MM format',
+                                 level='ERROR')
+
+                    d = (datetime.date.today().isoformat() + 'T' +
+                         limit_start + ':00')
+                else:
+                    d = datetime.date.today().isoformat() + 'T00:00:00'
             else:
                 d = ((datetime.date.today() +
                      datetime.timedelta(days=1)).isoformat() +
@@ -47,7 +72,7 @@ class OctoBlock(hass.Hass):
                 ' defaulting to "now"')
             d = now.isoformat()
 
-        self.get_period_and_cost(region, d)
+        self.get_period_and_cost(region, d, limit_end)
 
         hours = str(self.hours).replace(".", "_")
         if self.incoming:
@@ -79,18 +104,32 @@ class OctoBlock(hass.Hass):
                                attributes={'unit_of_measurement': 'p/kWh',
                                            'icon': 'mdi:flash-outline'})
 
-    def get_period_and_cost(self, region, timeperiod):
+    def get_period_and_cost(self, region, timeperiod, timeperiodend):
         baseurl = 'https://api.octopus.energy/v1/products/'
         if self.incoming:
-            r = requests.get(
-                baseurl + 'AGILE-18-02-21/electricity-tariffs/' +
-                'E-1R-AGILE-18-02-21-' + str(region).upper() +
-                '/standard-unit-rates/?period_from=' + timeperiod)
+            if not timeperiodend:
+                r = requests.get(
+                    baseurl + 'AGILE-18-02-21/electricity-tariffs/' +
+                    'E-1R-AGILE-18-02-21-' + str(region).upper() +
+                    '/standard-unit-rates/?period_from=' + timeperiod)
+            else:
+                r = requests.get(
+                    baseurl + 'AGILE-18-02-21/electricity-tariffs/' +
+                    'E-1R-AGILE-18-02-21-' + str(region).upper() +
+                    '/standard-unit-rates/?period_from=' + timeperiod +
+                    '&period_to=' + timeperiodend)
         elif self.outgoing:
-            r = requests.get(
-                baseurl + 'AGILE-OUTGOING-19-05-13/electricity-tariffs/' +
-                'E-1R-AGILE-OUTGOING-19-05-13-' + str(region).upper() +
-                '/standard-unit-rates/?period_from=' + timeperiod)
+            if not timeperiodend:
+                r = requests.get(
+                    baseurl + 'AGILE-OUTGOING-19-05-13/electricity-tariffs/' +
+                    'E-1R-AGILE-OUTGOING-19-05-13-' + str(region).upper() +
+                    '/standard-unit-rates/?period_from=' + timeperiod)
+            else:
+                r = requests.get(
+                    baseurl + 'AGILE-OUTGOING-19-05-13/electricity-tariffs/' +
+                    'E-1R-AGILE-OUTGOING-19-05-13-' + str(region).upper() +
+                    '/standard-unit-rates/?period_from=' + timeperiod +
+                    '&period_to=' + timeperiodend)
 
         tariff = json.loads(r.text)
         tariffresults = tariff[u'results']
