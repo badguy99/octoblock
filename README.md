@@ -1,5 +1,5 @@
 # octoblock
-Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. It creates and sets sensors for the cost and start time,  for example, using the apps.yaml file below, the following entities are created and then updated:
+Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. It creates and sets sensors for the cost and start time,  for example, using the `apps.yaml` file below, the following entities are created and then updated:
 ```
 sensor.octopus_1hour_time
 sensor.octopus_1hour_price
@@ -13,7 +13,7 @@ sensor.octopus_export_1hour_time
 sensor.octopus_export_1hour_price
 ```
 
-With `start_period` set to `now` and `hours` set to `0` the current import or export price is returned, and the sensors are named:
+With `start_period` set to `now` and `hour` set to `0` the current import or export price is returned, and the sensors are named:
 ```
 sensor.octopus_current_price
 sensor.octopus_export_current_price
@@ -26,7 +26,7 @@ sensor.octopus_export_current_price
 
 Use [HACS](https://github.com/custom-components/hacs) or download the octoblock directory from inside the apps directory [here](https://github.com/badguy99/octoblock/releases) to your local apps directory, then add the configuration to enable the octoblock module.
 
-### Apps.yaml Configuration
+### apps.yaml Configuration
 ```yaml
 octo_block_1hour:
   module: octoblock
@@ -45,7 +45,8 @@ octo_block_90minutes:
   limits:
     start_time: '07:00'
     end_time: '16:00'
-  ```
+```
+
 The module and class sections need to remain as above, other sections should be changed as required.
 
 | Field        | Changeable | Example          |
@@ -59,7 +60,7 @@ The module and class sections need to remain as above, other sections should be 
 | use_timezone | Yes        | True             |
 | import       | Yes        | True             |
 | export       | Yes        | False            |
-| limits       |            |                  |
+| limits:      |            |                  |
 |   start_time | Yes        | '07:00'          |
 |   end_time   | Yes        | '16:00'          |
 
@@ -69,7 +70,7 @@ You can have multiple blocks with different time periods (`hour` setting) or sta
 
 `start_period` is optional, it can be set to either `now` or `today`, and will default to `now`
 
-`now` and `today` give subtly different results. `now` is reevaluated ever time the callback is run (once every 30 minutes), and `today` uses a start time of 00:00:00 with today's date.
+`now` and `today` give subtly different results. `now` is re-evaluated every time the callback is run (once every 30 minutes), and `today` uses a start time of 00:00:00 with today's date.
 
 This means that using `today` you will get the absolute cheapest block for today, even if that is in the past, and using `now` will get the cheapest block for the remainder of the day. `today` may be of more use with automated triggers, and `now` may be of use when you are wanting to display the cheapest time on a Lovelace UI card and use that information to turn on devices which cannot be automated, by hand.
 
@@ -89,7 +90,7 @@ When using `today` for the `start_period` it can be limited further usings `limi
 
 `use_timezone` can be set to True or False, and defaults to False, it allows you to specify if the date/time should be displayed in UTC (False), or using Europe/London (True) as the timezone. For example, `2020-03-29T02:00:00Z` or `2020-03-29T03:00:00 BST` respectively.
 
-`import` and `export` should be set to True or False as required, `import = True` and `export = False` for the Agile Octopus tariff and `import = False` and `export = True` for the Agile Outgoing Octopus tariff.
+`import` and `export` should be set to True or False as required, `import: True` and `export: False` for the Agile Octopus tariff, and `import: False` and `export: True` for the Agile Outgoing Octopus tariff.
 
 ### Home Assistant Automation
 
@@ -109,26 +110,28 @@ trigger:
 
 Once the sensors are created, they can be displayed as cards within the Lovelace UI. For example:
 
+```yaml
+type: entities
+title: Best 1hr Price
+show_header_toggle: false
+entities:
+  - entity: sensor.octopus_1hour_price
+    icon: 'mdi:flash'
+    name: Price (p/kWh)
+  - entity: sensor.octopus_1hour_time
+    icon: 'mdi:clock-outline'
+    name: Time
+        
+type: entities
+title: Best 1.5hr Price
+show_header_toggle: false
+entities:
+  - entity: sensor.octopus_1_5hour_price
+    icon: 'mdi:flash'
+    name: Price (p/kWh)
+  - entity: sensor.octopus_1_5hour_time
+    icon: 'mdi:clock-outline'
+    name: Time
 ```
-      - entities:
-          - entity: sensor.octopus_1hour_price
-            icon: 'mdi:flash'
-            name: Price (p/kWh)
-          - entity: sensor.octopus_1hour_time
-            icon: 'mdi:clock-outline'
-            name: Time
-        show_header_toggle: false
-        title: Best 1hr Price
-        type: entities
-      - entities:
-          - entity: sensor.octopus_1_5hour_price
-            icon: 'mdi:flash'
-            name: Price (p/kWh)
-          - entity: sensor.octopus_1_5hour_time
-            icon: 'mdi:clock-outline'
-            name: Time
-        show_header_toggle: false
-        title: Best 1.5hr Price
-        type: entities
-```
+
 ![Lovelace UI best usage time example cards](https://github.com/badguy99/octoblock/blob/master/LovelaceBesttimeCard.PNG)
