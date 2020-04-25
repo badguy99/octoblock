@@ -39,31 +39,41 @@ class OctoBlock(hass.Hass):
                          'same configuration block', level='ERROR')
         now = datetime.datetime.now()
         if start_period == 'today':
-            if now.time() < datetime.time(23, 30, 0):
-                if limit_end:
-                    try:
-                        datetime.datetime.strptime(limit_end, "%H:%M")
-                    except ValueError:
-                        self.log('end_time not in correct HH:MM format',
-                                 level='ERROR')
+            if limit_end:
+                try:
+                    datetime.datetime.strptime(limit_end, "%H:%M")
+                except ValueError:
+                    self.log('end_time not in correct HH:MM format',
+                             level='ERROR')
 
-                    limit_end = (datetime.date.today().isoformat() + 'T' +
-                                 limit_end + ':00')
-                if limit_start:
-                    try:
-                        datetime.datetime.strptime(limit_start, "%H:%M")
-                    except ValueError:
-                        self.log('start_time not in correct HH:MM format',
-                                 level='ERROR')
+                limit_end_t = limit_end
+                limit_end = (datetime.date.today().isoformat() + 'T' +
+                             limit_end_t + ':00')
+                if now.time() >= datetime.time(23, 30, 0):
+                    limit_end = ((datetime.date.today() +
+                                 datetime.timedelta(days=1)).isoformat() +
+                                 'T' + limit_end_t + ':00')
+            if limit_start:
+                try:
+                    datetime.datetime.strptime(limit_start, "%H:%M")
+                except ValueError:
+                    self.log('start_time not in correct HH:MM format',
+                             level='ERROR')
 
-                    d = (datetime.date.today().isoformat() + 'T' +
-                         limit_start + ':00')
-                else:
-                    d = datetime.date.today().isoformat() + 'T00:00:00'
+                d = (datetime.date.today().isoformat() + 'T' +
+                     limit_start + ':00')
+                if now.time() >= datetime.time(23, 30, 0):
+                    d = ((datetime.date.today() +
+                         datetime.timedelta(days=1)).isoformat() +
+                         'T' + limit_start + ':00')
             else:
-                d = ((datetime.date.today() +
-                     datetime.timedelta(days=1)).isoformat() +
-                     'T00:00:00')
+                if now.time() < datetime.time(23, 30, 0):
+                    d = datetime.date.today().isoformat() + 'T00:00:00'
+                else:
+                    d = ((datetime.date.today() +
+                         datetime.timedelta(days=1)).isoformat() +
+                         'T00:00:00')
+
         elif start_period == 'now':
             d = now.isoformat()
         else:
