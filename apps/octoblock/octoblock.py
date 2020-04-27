@@ -79,7 +79,7 @@ class OctoBlock(hass.Hass):
         else:
             self.log(
                 'start_period in apps.yaml is not either "today" or "now",' +
-                ' defaulting to "now"')
+                ' defaulting to "now"', level='WARNING')
             d = now.isoformat()
 
         self.get_period_and_cost(region, d, limit_end)
@@ -141,6 +141,10 @@ class OctoBlock(hass.Hass):
                     '/standard-unit-rates/?period_from=' + timeperiod +
                     '&period_to=' + timeperiodend)
 
+        if r.status_code != 200:
+            self.log('Error getting tariff data: {}'.format(r.text),
+                     level='ERROR')
+
         tariff = json.loads(r.text)
         tariffresults = tariff[u'results']
         tariffresults.reverse()
@@ -152,11 +156,11 @@ class OctoBlock(hass.Hass):
             if self.incoming:
                 self.price = tariffresults[0]['value_inc_vat']
                 self.log('Current import price is: {} p/kWh'.format(
-                    self.price))
+                    self.price), level='INFO')
             elif self.outgoing:
                 self.price = tariffresults[0]['value_inc_vat']
                 self.log('Current export price is: {} p/kWh'.format(
-                    self.price))
+                    self.price), level='INFO')
         else:
             for period in tariffresults:
                 curridx = tariffresults.index(period)
@@ -180,14 +184,16 @@ class OctoBlock(hass.Hass):
                     for period in tariffresults)
                 self.log('Lowest average price for ' +
                          '{}'.format(str(self.hours)) +
-                         ' hour block is: {} p/kWh'.format(self.price))
+                         ' hour block is: {} p/kWh'.format(self.price),
+                         level='INFO')
             elif self.outgoing:
                 self.price = max(
                     period[str(self.hours) + '_hour_average']
                     for period in tariffresults)
                 self.log('Highest average price for ' +
                          '{}'.format(str(self.hours)) +
-                         ' hour block is: {} p/kWh'.format(self.price))
+                         ' hour block is: {} p/kWh'.format(self.price),
+                         level='INFO')
 
             for period in tariffresults:
                 if period[str(self.hours) + '_hour_average'] == self.price:
@@ -199,4 +205,5 @@ class OctoBlock(hass.Hass):
                         local_datetime = date_time.astimezone(greenwich)
                         self.time = local_datetime.strftime(fmt)
                     self.log('Best priced {} hour '.format(str(self.hours)) +
-                             'period starts at: {}'.format(self.time))
+                             'period starts at: {}'.format(self.time),
+                             level='INFO')
