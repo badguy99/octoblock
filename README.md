@@ -104,7 +104,7 @@ When using `today` for the `start_period` it can be limited further usings `limi
 
 Look aheads provide a HA sensor that will be set to true if the price will go below or above (depending upon operation setting) a specified point, x, within the next `duration_ahead` hours, up to the maximum look ahead that Octopus Energy provide price data for.
 
-Setting `operation` to `above` or `below` and `and_equal` to `True` or `False` in the yaml file give different functions; namely: greater than, less than, greater than & equal, and lessthan and equal. Such that it should be possible to set up required trigger points looking at prices in the future for automations.
+Setting `operation` to `above` or `below` and `and_equal` to `True` or `False` in the yaml file give different functions; namely: greater than, less than, greater than & equal, and less than and equal. Such that it should be possible to set up required trigger points looking at prices in the future for automations.
 
 ### Home Assistant Automation
 
