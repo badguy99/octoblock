@@ -97,7 +97,8 @@ class OctoBlock(hass.Hass):
         self.outgoing_tariff.reverse()
 
     def calculate_limit_points(self):
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
+        self.log('**Now Date: {} **'.format(now), level='DEBUG')
         self.start_date = None
         self.end_date = None
         if self.start_period == 'today':
@@ -115,6 +116,13 @@ class OctoBlock(hass.Hass):
                     self.end_date = ((datetime.date.today() +
                                      datetime.timedelta(days=1)).isoformat() +
                                      'T' + limit_end_t + ':00Z')
+
+                if self.use_timezone:
+                    self.end_date = self.limit_time_timezone(self.end_date)
+
+                self.log('**Today Limit End Date: {} **'.format(
+                         self.end_date), level='DEBUG')
+
             if hasattr(self, 'limit_start'):
                 try:
                     datetime.datetime.strptime(self.limit_start, "%H:%M")
@@ -128,6 +136,13 @@ class OctoBlock(hass.Hass):
                     self.start_date = ((datetime.date.today() +
                                        datetime.timedelta(days=1)).isoformat()
                                        + 'T' + self.limit_start + ':00Z')
+
+                if self.use_timezone:
+                    self.start_date = self.limit_time_timezone(self.start_date)
+
+                self.log('**Today Limit Start Date: {} **'.format(
+                         self.start_date), level='DEBUG')
+
             else:
                 if now.time() < datetime.time(23, 30, 0):
                     self.start_date = (datetime.date.today().isoformat() +
@@ -136,15 +151,21 @@ class OctoBlock(hass.Hass):
                     self.start_date = ((datetime.date.today() +
                          datetime.timedelta(days=1)).isoformat() +
                          'T00:00:00Z')
+                self.log('**Today Start Date: {} **'.format(
+                         self.start_date), level='DEBUG')
 
         elif self.start_period == 'now':
             flr_now = self.floor_dt(now)
             self.start_date = flr_now.isoformat(timespec='seconds') + 'Z'
+            self.log('**Now Start Date: {} **'.format(
+                     self.start_date), level='DEBUG')
         else:
             self.log(
                 'start_period in apps.yaml is not either "today" or "now",' +
                 ' defaulting to "now"', level='WARNING')
             self.start_date = now.isoformat()
+            self.log('**Defaulting Start Date: {} **'.format(
+                     self.start_date), level='DEBUG')
         self.log('start date: {} / end date: {}'.format(
                  self.start_date, self.end_date), level='DEBUG')
 
@@ -155,6 +176,16 @@ class OctoBlock(hass.Hass):
 
     def dt_to_api_date(self, dt):
         return dt.isoformat() + 'Z'
+
+    def limit_time_timezone(self, dtz):
+        fmt = '%Y-%m-%dT%H:%M:%S'
+        greenwich = pytz.timezone('Europe/London')
+        dt = dtz.strip('Z')
+        date_time = dateutil.parser.parse(dt)
+        local_datetime = date_time.astimezone(greenwich)
+        utc_datetime = local_datetime.astimezone(pytz.utc)
+        utcz = utc_datetime.strftime(fmt) + 'Z'
+        return utcz
 
     def date_to_idx(self, tariff, date):
         # Date format for API - 2020-05-29T20:00:00Z
@@ -172,21 +203,32 @@ class OctoBlock(hass.Hass):
         if self.hours == 0:
             now_utc_flr = self.floor_dt(datetime.datetime.utcnow())
             api_date_now = self.dt_to_api_date(now_utc_flr)
+            self.log('**Now API Date get_period_and_cost: {} **'.format(
+                     api_date_now), level='DEBUG')
+
             i = self.date_to_idx(tariffresults, api_date_now)
             if self.incoming:
                 self.price = tariffresults[i]['value_inc_vat']
                 self.log('Current import price is: {} p/kWh'.format(
                     self.price), level='INFO')
+                self.log('**Tariff Date get_period_and_cost: {} **'.format(
+                         tariffresults[i]['valid_from']), level='DEBUG')
+
             elif self.outgoing:
                 self.price = tariffresults[i]['value_inc_vat']
                 self.log('Current export price is: {} p/kWh'.format(
                     self.price), level='INFO')
+                self.log('**Tariff Date get_period_and_cost: {} **'.format(
+                         tariffresults[i]['valid_from']), level='DEBUG')
+
         else:
             start_idx = self.date_to_idx(tariffresults, self.start_date)
             end_idx = self.date_to_idx(tariffresults, self.end_date)
             if not end_idx:
                 end_idx = len(tariffresults) - 1
             for curridx in range (start_idx, end_idx):
+                self.log('**curridx: {} - Running from {}-{}**'.format(
+                         curridx, start_idx, end_idx), level='DEBUG')
                 period = tariffresults[curridx]
                 tr_len = len(tariffresults)
                 if curridx > tr_len - blocks:
@@ -223,6 +265,8 @@ class OctoBlock(hass.Hass):
                 period = tariffresults[curridx]
                 if period[str(self.hours) + '_hour_average'] == self.price:
                     self.time = period[u'valid_from']
+                    self.log('**Time: {}**'.format(self.time), level='DEBUG')
+
                     if self.use_timezone:
                         fmt = '%Y-%m-%dT%H:%M:%S %Z'
                         greenwich = pytz.timezone('Europe/London')
