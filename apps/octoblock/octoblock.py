@@ -291,7 +291,7 @@ class OctoBlock(hass.Hass):
         api_date_now = self.dt_to_api_date(now_utc_flr)
         i = self.date_to_idx(tariffresults, api_date_now)
 
-        for n in range (i, self.duration_ahead*2+i):
+        for n in range (i, min(self.duration_ahead*2+i, len(tariffresults) - 1)):
             period_cost = tariffresults[n]['value_inc_vat']
             if period_cost:
                 if self.operation == 'below':
