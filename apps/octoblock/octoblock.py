@@ -169,15 +169,18 @@ class OctoBlock(hass.Hass):
         self.log('start date: {} / end date: {}'.format(
                  self.start_date, self.end_date), level='DEBUG')
 
-    def floor_dt(self, dt, interval=30):
+    @classmethod
+    def floor_dt(cls, dt, interval=30):
         replace = (dt.minute // interval)*interval
         newdt = dt.replace(minute = replace, second=0, microsecond=0)
         return newdt
 
-    def dt_to_api_date(self, dt):
+    @classmethod
+    def dt_to_api_date(cls, dt):
         return dt.isoformat() + 'Z'
 
-    def limit_time_timezone(self, dtz):
+    @classmethod
+    def limit_time_timezone(cls, dtz):
         fmt = '%Y-%m-%dT%H:%M:%S'
         greenwich = pytz.timezone('Europe/London')
         dt = dtz.strip('Z')
@@ -187,10 +190,32 @@ class OctoBlock(hass.Hass):
         utcz = utc_datetime.strftime(fmt) + 'Z'
         return utcz
 
-    def date_to_idx(self, tariff, date):
+    @classmethod
+    def date_to_idx(cls, tariff, date):
         # Date format for API - 2020-05-29T20:00:00Z
         idx = next((i for i, item in enumerate(tariff) if item['valid_from'] == date), None)
         return idx
+
+    def get_current_period_and_cost(self, tariffresults):
+        now_utc_flr = self.floor_dt(datetime.datetime.utcnow())
+        api_date_now = self.dt_to_api_date(now_utc_flr)
+        self.log('**Now API Date get_period_and_cost: {} **'.format(
+                 api_date_now), level='DEBUG')
+
+        i = self.date_to_idx(tariffresults, api_date_now)
+        if self.incoming:
+            self.price = tariffresults[i]['value_inc_vat']
+            self.log('Current import price is: {} p/kWh'.format(
+                self.price), level='INFO')
+            self.log('**Tariff Date get_period_and_cost: {} **'.format(
+                     tariffresults[i]['valid_from']), level='DEBUG')
+
+        elif self.outgoing:
+            self.price = tariffresults[i]['value_inc_vat']
+            self.log('Current export price is: {} p/kWh'.format(
+                self.price), level='INFO')
+            self.log('**Tariff Date get_period_and_cost: {} **'.format(
+                     tariffresults[i]['valid_from']), level='DEBUG')
 
     def get_period_and_cost(self):
         blocks = float(self.hours) * 2
@@ -201,25 +226,7 @@ class OctoBlock(hass.Hass):
             tariffresults = self.outgoing_tariff
 
         if self.hours == 0:
-            now_utc_flr = self.floor_dt(datetime.datetime.utcnow())
-            api_date_now = self.dt_to_api_date(now_utc_flr)
-            self.log('**Now API Date get_period_and_cost: {} **'.format(
-                     api_date_now), level='DEBUG')
-
-            i = self.date_to_idx(tariffresults, api_date_now)
-            if self.incoming:
-                self.price = tariffresults[i]['value_inc_vat']
-                self.log('Current import price is: {} p/kWh'.format(
-                    self.price), level='INFO')
-                self.log('**Tariff Date get_period_and_cost: {} **'.format(
-                         tariffresults[i]['valid_from']), level='DEBUG')
-
-            elif self.outgoing:
-                self.price = tariffresults[i]['value_inc_vat']
-                self.log('Current export price is: {} p/kWh'.format(
-                    self.price), level='INFO')
-                self.log('**Tariff Date get_period_and_cost: {} **'.format(
-                         tariffresults[i]['valid_from']), level='DEBUG')
+            self.get_current_period_and_cost(tariffresults)
 
         else:
             start_idx = self.date_to_idx(tariffresults, self.start_date)
@@ -296,11 +303,9 @@ class OctoBlock(hass.Hass):
                     entity_id_t = 'sensor.octopus_' + hours + 'hour_time'
                     entity_id_p = 'sensor.octopus_' + hours + 'hour_price'
 
-                self.set_state(entity_id_t,
-                               state=self.time,
+                self.set_state(entity_id_t, state=self.time,
                                attributes={'icon': 'mdi:clock-outline'})
-                self.set_state(entity_id_p,
-                               state=round(self.price, 4),
+                self.set_state(entity_id_p, state=round(self.price, 4),
                                attributes={'unit_of_measurement': 'p/kWh',
                                            'icon': 'mdi:flash'})
         elif self.outgoing:
@@ -314,21 +319,13 @@ class OctoBlock(hass.Hass):
                     entity_id_t = 'sensor.octopus_export' + hours + 'hour_time'
                     entity_id_p = 'sensor.octopus_export' + hours + 'hour_price'
 
-                self.set_state(entity_id_t,
-                               state=self.time,
+                self.set_state(entity_id_t, state=self.time,
                                attributes={'icon': 'mdi:clock-outline'})
-                self.set_state(entity_id_p,
-                               state=round(self.price, 4),
+                self.set_state(entity_id_p, state=round(self.price, 4),
                                attributes={'unit_of_measurement': 'p/kWh',
                                            'icon': 'mdi:flash-outline'})
 
     def is_price_below_x(self):
-        '''
-        HA sensor that will be set to true if the price will go below
-        or above (depending upon operation setting) a specified point, x,
-        within the next y hours, up to the maximum look ahead that Octopus
-        Energy provide price data for.
-        '''
         result = False
         tariffresults = self.incoming_tariff
         now_utc_flr = self.floor_dt(datetime.datetime.utcnow())

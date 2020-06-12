@@ -4,7 +4,7 @@ Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/
 *Please note:* *Breaking Changes!* New yaml structure in version 2!
 
 It creates and sets sensors for the cost and start time,  for example, using the `apps.yaml` file below, the following entities are created and then updated:
-```
+```yaml
 sensor.octopus_1hour_time
 sensor.octopus_1hour_price
 sensor.octopus_1_5hour_time
@@ -12,13 +12,13 @@ sensor.octopus_1_5hour_price
 ```
 
 Sensors for export will be created with naming such as:
-```
+```yaml
 sensor.octopus_export_1hour_time
 sensor.octopus_export_1hour_price
 ```
 
 With `start_period` set to `now` and `hour` set to `0` the current import or export price is returned, and the sensors are named:
-```
+```yaml
 sensor.octopus_current_price
 sensor.octopus_export_current_price
 ```
@@ -27,11 +27,11 @@ Sensor names can be overridden and your own name specified in the yaml configura
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
-### Installation
+## Installation
 
 Use [HACS](https://github.com/custom-components/hacs) or download the octoblock directory from inside the apps directory [here](https://github.com/badguy99/octoblock/releases) to your local apps directory, then add the configuration to enable the octoblock module.
 
-### apps.yaml Configuration
+## apps.yaml Configuration
 ```yaml
 octoblock:
   module: octoblock
@@ -106,12 +106,12 @@ Look aheads provide a HA sensor that will be set to true if the price will go be
 
 Setting `operation` to `above` or `below` and `and_equal` to `True` or `False` in the yaml file give different functions; namely: greater than, less than, greater than & equal, and less than and equal. Such that it should be possible to set up required trigger points looking at prices in the future for automations.
 
-### Home Assistant Automation
+## Home Assistant Automation
 
 The created start time sensors can then be used to trigger automations within Home Assistant.
 This requires the [Time Date integration](https://www.home-assistant.io/integrations/time_date/) to be configured as well. The triggers such as the following can be set up to trigger the automations.
 
-```
+```yaml
 trigger:
   platform: template
   value_template: >
@@ -120,7 +120,7 @@ trigger:
   {% endif %}
 ```
   
-### Lovelace UI Cards
+## Lovelace UI Cards
 
 Once the sensors are created, they can be displayed as cards within the Lovelace UI. For example:
 
