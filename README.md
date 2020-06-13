@@ -1,4 +1,9 @@
 # octoblock
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/35d30362cd7741bea9688225435134ac)](https://www.codacy.com/manual/badguy99/octoblock?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=badguy99/octoblock&amp;utm_campaign=Badge_Grade)
+
 Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. 
 
 *Please note:* *Breaking Changes!* New yaml structure in version 2!
@@ -24,8 +29,6 @@ sensor.octopus_export_current_price
 ```
 
 Sensor names can be overridden and your own name specified in the yaml configuration. These will be of the format `sensor.<your_name>_time` and `sensor.<your_name>_price` with any dots in `<your_name>` changed to underscores.
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ## Installation
 
