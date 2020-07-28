@@ -4,6 +4,10 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/35d30362cd7741bea9688225435134ac)](https://www.codacy.com/manual/badguy99/octoblock?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=badguy99/octoblock&amp;utm_campaign=Badge_Grade)
 
+If you think this will be useful to you, please consider signing up to Octopus Energy with my referral code: https://share.octopus.energy/dense-ape-125 - You'll get £50 credit too!
+
+## Summary
+
 Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. 
 
 *Please note:* *Breaking Changes!* New yaml structure in version 2!
