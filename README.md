@@ -119,12 +119,12 @@ The created start time sensors can then be used to trigger automations within Ho
 This requires the [Time Date integration](https://www.home-assistant.io/integrations/time_date/) to be configured as well. The triggers such as the following can be set up to trigger the automations.
 
 ```yaml
-trigger:
-  platform: template
-  value_template: >
-  {% if (states("sensor.date_time_iso") + "Z") == (states("sensor.octopus_1hour_time")) %}
-    true
-  {% endif %}
+  trigger:
+  - platform: template
+    value_template: '{% if (states("sensor.date_time_iso") + (" BST"))  == (states("sensor.octopus_1hour_time"))
+      or (states("sensor.date_time_iso") + (" GMT"))  == (states("sensor.octopus_1hour_time"))
+      -%} True {%- endif %}'
+
 ```
   
 ## Lovelace UI Cards
