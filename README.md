@@ -10,8 +10,6 @@ If you think this will be useful to you, please consider signing up to Octopus E
 
 Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. 
 
-*Please note:* *Breaking Changes!* New yaml structure in version 2!
-
 It creates and sets sensors for the cost and start time,  for example, using the `apps.yaml` file below, the following entities are created and then updated:
 ```yaml
 sensor.octopus_1hour_time
@@ -26,13 +24,20 @@ sensor.octopus_export_1hour_time
 sensor.octopus_export_1hour_price
 ```
 
+Sensor names can be overridden and your own name specified in the yaml configuration. These will be of the format `sensor.<your_name>_time` and `sensor.<your_name>_price` with any dots in `<your_name>` changed to underscores.
+
+### Special Cases
 With `start_period` set to `now` and `hour` set to `0` the current import or export price is returned, and the sensors are named:
 ```yaml
 sensor.octopus_current_price
 sensor.octopus_export_current_price
 ```
 
-Sensor names can be overridden and your own name specified in the yaml configuration. These will be of the format `sensor.<your_name>_time` and `sensor.<your_name>_price` with any dots in `<your_name>` changed to underscores.
+With `start_period` set to `now` and `hour` set to `next` the next import or export price is returned, and the sensors are named:
+```yaml
+sensor.octopus_next_price
+sensor.octopus_export_next_price
+```
 
 ## Installation
 
