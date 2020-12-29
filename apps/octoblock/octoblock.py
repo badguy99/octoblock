@@ -92,7 +92,7 @@ class OctoBlock(hass.Hass):
             )
 
         tariff = json.loads(r.text)
-        self.incoming_tariff = tariff[u"results"]
+        self.incoming_tariff = tariff["results"]
         self.incoming_tariff.reverse()
 
     def get_export_prices(self):
@@ -113,7 +113,7 @@ class OctoBlock(hass.Hass):
             )
 
         tariff = json.loads(r.text)
-        self.outgoing_tariff = tariff[u"results"]
+        self.outgoing_tariff = tariff["results"]
         self.outgoing_tariff.reverse()
 
     def calculate_limit_points(self):
@@ -237,8 +237,7 @@ class OctoBlock(hass.Hass):
         now_utc_flr = self.floor_dt(datetime.datetime.utcnow())
         api_date_now = self.dt_to_api_date(now_utc_flr)
         self.log(
-            f"**Now API Date get_period_and_cost: {api_date_now} **",
-            level="DEBUG"
+            f"**Now API Date get_period_and_cost: {api_date_now} **", level="DEBUG"
         )
 
         i = self.date_to_idx(tariffresults, api_date_now)
@@ -250,7 +249,7 @@ class OctoBlock(hass.Hass):
         )
         self.log(
             f"**Tariff Date get_period_and_cost: {tariffresults[i]['valid_from']} **",
-            level="DEBUG"
+            level="DEBUG",
         )
 
     def get_period_and_cost(self):
@@ -286,7 +285,7 @@ class OctoBlock(hass.Hass):
                     continue
                 cost = 0
                 for block in range(blocks):
-                    cost = cost + (tariffresults[curridx + block][u"value_inc_vat"])
+                    cost = cost + (tariffresults[curridx + block]["value_inc_vat"])
                 cost = cost / blocks
                 period[str(self.hours) + "_hour_average"] = cost
 
@@ -316,7 +315,7 @@ class OctoBlock(hass.Hass):
             for curridx in range(start_idx, end_idx):
                 period = tariffresults[curridx]
                 if period[str(self.hours) + "_hour_average"] == self.price:
-                    self.time = period[u"valid_from"]
+                    self.time = period["valid_from"]
                     self.log("**Time: {}**".format(self.time), level="DEBUG")
 
                     if self.use_timezone:
