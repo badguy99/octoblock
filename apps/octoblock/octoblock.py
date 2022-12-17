@@ -12,6 +12,8 @@ class OctoBlock(hass.Hass):
         self.baseurl = "https://api.octopus.energy/v1/products/"
         region = self.args.get("region", "H")
         self.region = str(region).upper()
+        self.import_code = self.args.get("import_code", "AGILE-FLEX-22-11-25")
+        self.export_code = self.args.get("export_code", "AGILE-OUTGOING-19-05-13")
         self.use_timezone = self.args.get("use_timezone", False)
         self.blocks = self.args.get("blocks", None)
         self.lookaheads = self.args.get("lookaheads", None)
@@ -76,11 +78,8 @@ class OctoBlock(hass.Hass):
 
     def get_import_prices(self):
         r = requests.get(
-            self.baseurl
-            + "AGILE-18-02-21/electricity-tariffs/"
-            + "E-1R-AGILE-18-02-21-"
-            + self.region
-            + "/standard-unit-rates/"
+            f"{self.baseurl}{self.import_code}/electricity-tariffs/E-1R-"
+            f"{self.import_code}-{self.region}/standard-unit-rates/"
         )
 
         if r.status_code != 200:
@@ -97,11 +96,8 @@ class OctoBlock(hass.Hass):
 
     def get_export_prices(self):
         r = requests.get(
-            self.baseurl
-            + "AGILE-OUTGOING-19-05-13/electricity-tariffs/"
-            + "E-1R-AGILE-OUTGOING-19-05-13-"
-            + self.region
-            + "/standard-unit-rates/"
+            f"{self.baseurl}{self.export_code}/electricity-tariffs/E-1R-"
+            f"{self.export_code}-{self.region}/standard-unit-rates/"
         )
 
         if r.status_code != 200:

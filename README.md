@@ -6,6 +6,9 @@
 
 If you think this will be useful to you, please consider signing up to Octopus Energy with my referral code: https://share.octopus.energy/dense-ape-125 - You'll get £50 credit too!
 
+## Contributions Only
+I no longer use Agile Octopus tariffs, and do not plan on making any more updates to this code. As such if you want something, please feel free to fork the code and make changes. I will happily merge received PRs.
+
 ## Summary
 
 Octoblock is an app which works under [AppDaemon](https://www.home-assistant.io/docs/ecosystem/appdaemon/) within [Home Assistant](https://www.home-assistant.io/) which finds the cheapest “n” hour block for import or the most expensive “n” hour block for export, and works out the price of that block, for the Octopus Energy, Agile Octopus / Agile Outgoing Octopus tariffs. 
@@ -49,6 +52,8 @@ octoblock:
   module: octoblock
   class: OctoBlock
   region: H
+  import_code: AGILE-FLEX-22-11-25
+  export_code: AGILE-OUTGOING-19-05-13
   use_timezone: False
   blocks:
     - hour: 1
@@ -87,6 +92,8 @@ The module and class sections need to remain as above, other sections should be 
 You can have multiple blocks with different time periods (`hour` setting) or starting points (`start_period` setting) as needed. It will work with whole hour or half hour blocks in the `hour` setting.
 
 `region` is the region letter from the end of `E-1R-AGILE-18-02-21-H` which can be found on the [Octopus Energy developer dashboard](https://octopus.energy/dashboard/developer/) webpage in the Unit Rates section for your account.
+
+`import_code` and `export_code` can be specified, they default to `AGILE-FLEX-22-11-25` and `AGILE-OUTGOING-19-05-13` respectively.
 
 `start_period` is optional, it can be set to either `now` or `today`, and will default to `now`
 
