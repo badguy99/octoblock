@@ -87,7 +87,7 @@ octoblock:
 
 The module and class sections need to remain as above, other sections should be changed as required.
 
-### Octoblock
+### Octoblock module
 
 `region` is the region letter (e.g. `H`) from the end of your tariff code which will look something like `E-1R-AGILE-18-02-21-H`.  The tariff code used to be found on the [Octopus Energy developer dashboard](https://octopus.energy/dashboard/developer/) webpage in the Unit Rates section for your account, but Octopus seem to have removed this.
 
