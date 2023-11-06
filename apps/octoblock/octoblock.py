@@ -324,7 +324,7 @@ class OctoBlock(hass.Hass):
                     else:
                         date_time = dateutil.parser.parse(self.time)
                         self.time = date_time.strftime(self.time_format)
-                    
+
                     self.log(
                         "Best priced {} hour ".format(str(self.hours))
                         + "period starts at: {}".format(self.time),
