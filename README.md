@@ -55,6 +55,8 @@ octoblock:
   import_code: AGILE-FLEX-22-11-25
   export_code: AGILE-OUTGOING-19-05-13
   use_timezone: False
+  price_round: 2
+  time_format: "%Y-%m-%dT%H:%M:%S%Z"
   blocks:
     - hour: 1
       import: True
@@ -100,6 +102,10 @@ Install, configure and start the integration, go to Developer Tools/States and f
 NB: If you get the tariff code wrong (e.g. forget to remove the E-1R- prefix or -H suffix) you will get an error `ERROR octoblock: Error 404 getting incoming tariff data: {"detail":"Not found."}` reported in the appdaemon log and the rest of the octoblock configuration (custom blocks etc) will be ignored!
 
 `use_timezone` can be set to True or False, and defaults to False, it allows you to specify if the date/time should be displayed in UTC (False), or using Europe/London (True) as the timezone. For example, `2020-03-29T02:00:00Z` or `2020-03-29T03:00:00 BST` respectively.
+
+`price_round` can be set to the number of decimal places to round the average price for the specified period to, and defaults to 4 if not specified.  For example, set to 2 to round to 2 decimal places, e.g. 14.56 p/kWh.
+
+`time_format` can be set to a [strftime format code](https://www.geeksforgeeks.org/python-strftime-function/) that the date/time that the block starts at. If not specified it defaults to `%Y-%m-%dT%H:%M:%S%Z`, e.g. `2020-03-19T20:00:00Z`.  An easier to read and shorter time format for example could be `%a %-I:%M %p` which would display the block start time as `Tue 1:30 AM`.  Note that if you change the time_format from the default then you may need to adjust any automation scripts so that they can still match the returned block time.  If you are only displaying the block time in a Lovelace UI dashboard display as shown below then this won't be an issue.
 
 ### Blocks
 
@@ -158,7 +164,7 @@ show_header_toggle: false
 entities:
   - entity: sensor.octopus_1hour_price
     icon: 'mdi:flash'
-    name: Price (p/kWh)
+    name: Price
   - entity: sensor.octopus_1hour_time
     icon: 'mdi:clock-outline'
     name: Time
@@ -169,7 +175,7 @@ show_header_toggle: false
 entities:
   - entity: sensor.octopus_1_5hour_price
     icon: 'mdi:flash'
-    name: Price (p/kWh)
+    name: Price
   - entity: sensor.octopus_1_5hour_time
     icon: 'mdi:clock-outline'
     name: Time
