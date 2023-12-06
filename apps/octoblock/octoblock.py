@@ -70,7 +70,9 @@ class OctoBlock(hass.Hass):
                 self.duration_ahead = lookahead.get("duration_ahead", 12)
                 self.name = lookahead.get("name", None)
                 self.log(
-                    "Lookahead:\nPrice: {}".format(round(self.price, int(self.price_round)))
+                    "Lookahead:\nPrice: {}".format(
+                        round(self.price, int(self.price_round))
+                    )
                     + "\nFor: {}".format(self.duration_ahead)
                     + "\nName: {}".format(self.name),
                     level="DEBUG",
@@ -243,7 +245,8 @@ class OctoBlock(hass.Hass):
             i += 1
         self.price = tariffresults[i]["value_inc_vat"]
         self.log(
-            f"{now_or_next} {direction} price is: {round(self.price, int(self.price_round))} p/kWh", level="INFO"
+            f"{now_or_next} {direction} price is: {round(self.price, int(self.price_round))} p/kWh",
+            level="INFO",
         )
         self.log(
             f"**Tariff Date get_period_and_cost: {tariffresults[i]['valid_from']} **",
@@ -295,7 +298,9 @@ class OctoBlock(hass.Hass):
                 self.log(
                     "Lowest average price for "
                     + "{}".format(str(self.hours))
-                    + " hour block is: {} p/kWh".format(round(self.price, int(self.price_round))),
+                    + " hour block is: {} p/kWh".format(
+                        round(self.price, int(self.price_round))
+                    ),
                     level="INFO",
                 )
             elif self.outgoing:
@@ -306,7 +311,9 @@ class OctoBlock(hass.Hass):
                 self.log(
                     "Highest average price for "
                     + "{}".format(str(self.hours))
-                    + " hour block is: {} p/kWh".format(round(self.price, int(self.price_round))),
+                    + " hour block is: {} p/kWh".format(
+                        round(self.price, int(self.price_round))
+                    ),
                     level="INFO",
                 )
 
