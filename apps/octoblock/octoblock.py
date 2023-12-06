@@ -15,6 +15,8 @@ class OctoBlock(hass.Hass):
         self.import_code = self.args.get("import_code", "AGILE-FLEX-22-11-25")
         self.export_code = self.args.get("export_code", "AGILE-OUTGOING-19-05-13")
         self.use_timezone = self.args.get("use_timezone", False)
+        self.price_round = self.args.get("price_round", 4)
+        self.time_format = self.args.get("time_format", "%Y-%m-%dT%H:%M:%S%Z")
         self.blocks = self.args.get("blocks", None)
         self.lookaheads = self.args.get("lookaheads", None)
 
@@ -68,7 +70,7 @@ class OctoBlock(hass.Hass):
                 self.duration_ahead = lookahead.get("duration_ahead", 12)
                 self.name = lookahead.get("name", None)
                 self.log(
-                    "Lookahead:\nPrice: {}".format(self.price)
+                    "Lookahead:\nPrice: {}".format(round(self.price, int(self.price_round)))
                     + "\nFor: {}".format(self.duration_ahead)
                     + "\nName: {}".format(self.name),
                     level="DEBUG",
@@ -241,7 +243,7 @@ class OctoBlock(hass.Hass):
             i += 1
         self.price = tariffresults[i]["value_inc_vat"]
         self.log(
-            f"{now_or_next} {direction} price is: {self.price} p/kWh", level="INFO"
+            f"{now_or_next} {direction} price is: {round(self.price, int(self.price_round))} p/kWh", level="INFO"
         )
         self.log(
             f"**Tariff Date get_period_and_cost: {tariffresults[i]['valid_from']} **",
@@ -293,7 +295,7 @@ class OctoBlock(hass.Hass):
                 self.log(
                     "Lowest average price for "
                     + "{}".format(str(self.hours))
-                    + " hour block is: {} p/kWh".format(self.price),
+                    + " hour block is: {} p/kWh".format(round(self.price, int(self.price_round))),
                     level="INFO",
                 )
             elif self.outgoing:
@@ -304,7 +306,7 @@ class OctoBlock(hass.Hass):
                 self.log(
                     "Highest average price for "
                     + "{}".format(str(self.hours))
-                    + " hour block is: {} p/kWh".format(self.price),
+                    + " hour block is: {} p/kWh".format(round(self.price, int(self.price_round))),
                     level="INFO",
                 )
 
@@ -315,11 +317,14 @@ class OctoBlock(hass.Hass):
                     self.log("**Time: {}**".format(self.time), level="DEBUG")
 
                     if self.use_timezone:
-                        fmt = "%Y-%m-%dT%H:%M:%S %Z"
                         greenwich = pytz.timezone("Europe/London")
                         date_time = dateutil.parser.parse(self.time)
                         local_datetime = date_time.astimezone(greenwich)
-                        self.time = local_datetime.strftime(fmt)
+                        self.time = local_datetime.strftime(self.time_format)
+                    else:
+                        date_time = dateutil.parser.parse(self.time)
+                        self.time = date_time.strftime(self.time_format)
+
                     self.log(
                         "Best priced {} hour ".format(str(self.hours))
                         + "period starts at: {}".format(self.time),
@@ -338,13 +343,13 @@ class OctoBlock(hass.Hass):
             if self.hours == 0:
                 self.set_state(
                     "sensor.octopus_current_price",
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={"unit_of_measurement": "p/kWh", "icon": "mdi:flash"},
                 )
             elif str(self.hours).lower() == "next":
                 self.set_state(
                     "sensor.octopus_next_price",
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={"unit_of_measurement": "p/kWh", "icon": "mdi:flash"},
                 )
             else:
@@ -359,14 +364,14 @@ class OctoBlock(hass.Hass):
                 )
                 self.set_state(
                     entity_id_p,
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={"unit_of_measurement": "p/kWh", "icon": "mdi:flash"},
                 )
         elif self.outgoing:
             if self.hours == 0:
                 self.set_state(
                     "sensor.octopus_export_current_price",
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={
                         "unit_of_measurement": "p/kWh",
                         "icon": "mdi:flash-outline",
@@ -375,7 +380,7 @@ class OctoBlock(hass.Hass):
             elif str(self.hours).lower() == "next":
                 self.set_state(
                     "sensor.octopus_export_next_price",
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={
                         "unit_of_measurement": "p/kWh",
                         "icon": "mdi:flash-outline",
@@ -393,7 +398,7 @@ class OctoBlock(hass.Hass):
                 )
                 self.set_state(
                     entity_id_p,
-                    state=round(self.price, 4),
+                    state=round(self.price, int(self.price_round)),
                     attributes={
                         "unit_of_measurement": "p/kWh",
                         "icon": "mdi:flash-outline",
@@ -427,7 +432,7 @@ class OctoBlock(hass.Hass):
             name = str(self.name).replace(".", "_")
             self.entity_id = "sensor." + name
         else:
-            price = str(self.price).replace(".", "_")
+            price = str(round(self.price, int(self.price_round))).replace(".", "_")
             duration_ahead = str(self.duration_ahead).replace(".", "_")
             self.entity_id = (
                 "sensor.lookahead_for_cost_"
